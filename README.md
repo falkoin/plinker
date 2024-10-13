@@ -10,6 +10,6 @@ run app.py add <url> <description>
 
 To do:
 
-- [ ] Add yaml file to include settings (path to Hugo post directory)
+- [x] Add yaml file to include settings (path to Hugo post directory)
 - [ ] Add categories and tags
 - [ ] Add tests
