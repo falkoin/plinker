@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import Dict, List, Optional, Tuple
 import typer
 from datetime import date, datetime
 from jinja2 import Template
@@ -9,17 +9,28 @@ from contextlib import suppress
 
 class HugoWriter:
     def __init__(self) -> None:
+        self.path_to_posts = self._process_settings()
+        self.template = self._load_template()
+
+    @staticmethod
+    def _process_settings() -> Dict:
         with open("./settings.yml") as f:
-            self.path_to_posts = yaml.safe_load(f)
+            return yaml.safe_load(f)
+    
+    @staticmethod
+    def _load_template() -> Template:
         with open("./template.md") as f:
-            self.template = Template(f.read())
-        self.path = f"{self.path_to_posts['posts']}{date.today().strftime('%Y-%m-%d')}.md"
+            return Template(f.read())
+
+    def get_file_with_path(self) -> str:
+        return f"{self.path_to_posts['posts']}{date.today().strftime('%Y-%m-%d')}.md"
 
 
     def read_existing_template(self, links: List[Tuple]) -> List[Tuple]:
         pattern = r"\[([^\]]+)\]\(([^)]+)\)"
+        file_with_path = self.get_file_with_path()
         with suppress(FileNotFoundError):
-            with open(self.path, "r") as f:
+            with open(file_with_path, "r") as f:
                 for line in f:
                     matched_line = re.search(pattern, line)
                     if matched_line:
@@ -33,7 +44,8 @@ class HugoWriter:
         time_now = datetime.now()
         date_now = date.today()
         date_format = f"{date_now.strftime('%Y-%m-%d')}T{time_now.strftime('%H:%M:%S')}+02:00"
-        with open(self.path, "w") as f:
+        file_with_path = self.get_file_with_path()
+        with open(file_with_path, "w") as f:
             f.write(
                 self.template.render(
                     title=date_now.strftime("%d-%m-%Y"),
@@ -49,7 +61,6 @@ app = typer.Typer()
 def add(url: str, description: str):
     hugo_writer = HugoWriter()
     links = hugo_writer.read_existing_template(links=[(description, url)])
-    links = [(description, url)]
     hugo_writer.write_template(links=links)
 
 
