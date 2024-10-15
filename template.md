@@ -6,5 +6,5 @@ draft = false
 
 # Links
 {% for description, link in links %}
-[{{description}}]({{link}})
+{{description}} [[{{loop.index}}]]({{link}}) 
 {% endfor %}
