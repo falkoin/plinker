@@ -1,9 +1,10 @@
-from typing import Dict, List, Tuple
+from typing import List, Tuple
 import typer
 from datetime import date, datetime
 from jinja2 import Template
 import re
 import yaml
+from contextlib import suppress
 
 
 class HugoWriter:
@@ -13,6 +14,20 @@ class HugoWriter:
         with open("./template.md") as f:
             self.template = Template(f.read())
         self.path = f"{self.path_to_posts['posts']}{date.today().strftime('%Y-%m-%d')}.md"
+
+
+    def read_existing_template(self, links: List[Tuple]) -> List[Tuple]:
+        pattern = r"\[([^\]]+)\]\(([^)]+)\)"
+        with suppress(FileNotFoundError):
+            with open(self.path, "r") as f:
+                for line in f:
+                    matched_line = re.search(pattern, line)
+                    if matched_line:
+                        link = matched_line.group(2)
+                        description = matched_line.group(1)
+                        links.append((description, link))
+
+        return links
 
     def write_template(self, links: List[Tuple]):
         time_now = datetime.now()
@@ -27,18 +42,6 @@ class HugoWriter:
                 )
             )
 
-    def read_existing_template(self, links: List[Tuple]) -> List[Tuple]:
-        pattern = r"\[([^\]]+)\]\(([^)]+)\)"
-        with open(self.path, "r") as f:
-            for line in f:
-                matched_line = re.search(pattern, line)
-                if matched_line:
-                    link = matched_line.group(2)
-                    description = matched_line.group(1)
-                    links.append((description, link))
-        return links
-
-
 app = typer.Typer()
 
 
@@ -46,7 +49,7 @@ app = typer.Typer()
 def add(url: str, description: str):
     hugo_writer = HugoWriter()
     links = hugo_writer.read_existing_template(links=[(description, url)])
-    print(links)
+    links = [(description, url)]
     hugo_writer.write_template(links=links)
 
 
