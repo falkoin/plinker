@@ -44,7 +44,7 @@ class HugoWriter:
     def write_template(self, links: List[Tuple]):
         time_now = datetime.now()
         date_now = date.today()
-        date_format = f"{date_now.strftime('%Y-%m-%d')}T{time_now.strftime('%H:%M:%S')}+02:00"
+        date_format = f"{date_now.strftime('%d-%m-%Y')}T{time_now.strftime('%H:%M:%S')}+02:00"
         file_with_path = self.get_file_with_path()
         with open(file_with_path, "w") as f:
             f.write(
@@ -62,7 +62,6 @@ app = typer.Typer()
 def add(url: str, description: str):
     hugo_writer = HugoWriter()
     links = hugo_writer.read_existing_template(links=[(description, url)])
-    print(links)
     hugo_writer.write_template(links=links)
 
 

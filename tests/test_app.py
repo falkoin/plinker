@@ -40,6 +40,3 @@ class TestHugoWriter(TestCase):
         result = hugo_writer.get_file_with_path()
         # then
         self.assertEqual("/path/to/settings/2024-01-01.md", result)
-
-
-        
